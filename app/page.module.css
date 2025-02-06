@@ -1,0 +1,376 @@
+/* Container für die gesamte Seite */
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7fc;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+.header {
+    background-color: #0060ff;
+    color: white;
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-size: 2.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Hauptinhalt */
+.content {
+    display: flex;
+    flex: 1;
+    padding: 20px;
+}
+
+/* Linkes Menü */
+.menu {
+    width: 25%;
+    background-color: #ffffff;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-right: 20px;
+}
+
+.menu h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu ul li {
+    background: #fafafa;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.menu ul li:hover {
+    background-color: #0060ff;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Passwortliste */
+.passwordList {
+    width: 25%;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    border-left: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+}
+
+.passwordList h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.passwordList ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.passwordList ul li {
+    background: #fafafa;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.passwordList ul li:hover {
+    background-color: #0060ff;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Detailansicht */
+.details {
+    width: 30%;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.details h2 {
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.details p {
+    color: #555555;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.footer {
+    background-color: #333333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.logoutButton {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logoutButton:hover {
+    background-color: #e60000;
+}
+
+.loading {
+    font-size: 1.5rem;
+    text-align: center;
+    color: #0070f3;
+    margin-top: 2rem;
+}
+
+.error {
+    font-size: 1.2rem;
+    color: red;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.success {
+    font-size: 1.2rem;
+    color: green;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Passwort-Eintrag */
+.passwordItem {
+    background: #fafafa;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    pointer-events: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.passwordItem:hover {
+    background-color: #0060ff;
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Delete Button */
+.deleteButton {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-shrink: 0; /* Ensures button does not shrink */
+}
+
+.deleteButton:hover {
+    background-color: #e60000;
+    transform: translateY(-2px);
+}
+
+.categoryItem {
+    padding: 10px;
+    padding-right: 30px; /* Place for the delete button */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.categoryItem:hover {
+    background-color: #f0f0f0;
+}
+
+.activeCategory {
+    background-color: blue !important;
+    color: white;
+    font-weight: bold;
+}
+
+.deleteButtonCategories {
+    background-color: transparent;
+    color: #f44336;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    display: none;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.deleteButtonCategories:hover {
+    color: #d32f2f;
+    transform: translateY(-50%) scale(1.2);
+}
+
+.categoryItem:hover .deleteButtonCategories {
+    display: flex;
+}
+
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    max-width: 90%;
+}
+
+.modal h3 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal input,
+.modal textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.modal input:focus,
+.modal textarea:focus {
+    border-color: #0060ff;
+    outline: none;
+}
+
+.modal button {
+    background-color: #0060ff;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.modal button:hover {
+    background-color: #004bb5;
+    transform: translateY(-2px);
+}
+
+.modal button.closeButton {
+    background-color: #ff4d4d;
+    margin-top: 10px;
+}
+
+.modal button.closeButton:hover {
+    background-color: #e60000;
+}
+
+.passwordDetailsModal {
+    width: 50%;
+    background-color: #fff;
+    padding: 2%;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    margin-left: 1.5%;
+}
+
+.passwordDetailsModal h3 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.passwordDetailsModal h2 {
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #333;
+}
+
+
+
+.logoutButton {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logoutButton:hover {
+    background-color: darkred;
+}
