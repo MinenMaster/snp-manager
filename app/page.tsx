@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
+import { Copy } from "lucide-react";
 
 interface Category {
     id: number;
@@ -458,11 +459,11 @@ export default function LandingPage() {
                         <p>
                             <strong>Username:</strong>
                         </p>
-                        <p>{selectedPassword.username}</p>
+                        <p>{selectedPassword.username}<button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}><Copy size={15} /></button></p>
                         <p>
                             <strong>Password:</strong>
                         </p>
-                        <p>{selectedPassword.password}</p><button onClick={() => copyToClipboard(selectedPassword.password)}>📋 Copy</button>
+                        <p>{selectedPassword.password}<button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}><Copy size={15} /></button></p>
                         <p>
                             <strong>URL:</strong>
                         </p>
