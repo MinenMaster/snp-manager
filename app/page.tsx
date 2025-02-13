@@ -364,14 +364,24 @@ export default function LandingPage() {
         const errorData = await response.json();
         setError(errorData.message || "Failed to delete category.");
     }
-} catch (error) {
+    } catch (error) {
     setError("An error occurred while deleting the category.");
-}
+        }
     };
 // Logout Function
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         router.push("/login");
+    };
+
+    //copy function
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("password copied to clipboard")
+        } catch (err) {
+            console.error("failed to copy password");
+        }
     };
 
     return (
@@ -452,7 +462,7 @@ export default function LandingPage() {
                         <p>
                             <strong>Password:</strong>
                         </p>
-                        <p>{selectedPassword.password}</p>
+                        <p>{selectedPassword.password}</p><button onClick={() => copyToClipboard(selectedPassword.password)}>📋 Copy</button>
                         <p>
                             <strong>URL:</strong>
                         </p>

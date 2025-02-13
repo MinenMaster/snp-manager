@@ -11,7 +11,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.8",
-    "next": "^15.1.6",
+    "next": "^15.1.7",
     "nextjs": "file:",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
