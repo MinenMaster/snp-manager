@@ -287,7 +287,7 @@ export default function LandingPage() {
 
         setIsPasswordModalOpen(true);
     };
-
+    // delete Password Handler
     const handleDeletePassword = async () => {
         const token = localStorage.getItem("authToken");
         if (!token) {
