@@ -368,7 +368,7 @@ export default function LandingPage() {
     setError("An error occurred while deleting the category.");
 }
     };
-
+// Logout Function
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         router.push("/login");
