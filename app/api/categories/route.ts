@@ -1,11 +1,24 @@
 import { apiGet, apiPost } from "../database";
 import { authenticateJWT } from "../tools/authenticateJWT";
 
-export async function GET(req: Request) {
+interface UserRow {
+    id: number;
+    username: string;
+}
+
+interface CategoryRow {
+    id: number;
+    name: string;
+    userId: number;
+}
+
+export async function GET(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
-        const userIdQuery = `SELECT id FROM snp_users WHERE username = '${user.username}'`;
-        const userRows: any = await apiGet(userIdQuery);
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -14,13 +27,15 @@ export async function GET(req: Request) {
         }
         const userId = userRows[0].id;
 
-        const query = `SELECT id, name FROM snp_categories WHERE userId = '${userId}'`;
-        const rows: any = await apiGet(query);
+        const query = `SELECT id, name FROM snp_categories WHERE userId = ?`;
+        const rows = (await apiGet(query, [
+            userId.toString(),
+        ])) as CategoryRow[];
         return new Response(JSON.stringify(rows || []), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error fetching categories:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
@@ -29,7 +44,7 @@ export async function GET(req: Request) {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
         const { name } = await req.json();
@@ -39,8 +54,10 @@ export async function POST(req: Request) {
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
-        const userIdQuery = `SELECT id FROM snp_users WHERE username = '${user.username}'`;
-        const userRows: any = await apiGet(userIdQuery);
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -56,7 +73,7 @@ export async function POST(req: Request) {
             JSON.stringify({ message: "Category created successfully" }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error creating category:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),

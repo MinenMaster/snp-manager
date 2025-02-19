@@ -1,11 +1,29 @@
 import { apiGet, apiPost, apiDelete } from "../../database";
 import { getCurrentTimestampISO } from "../../tools/timestamp";
 import { authenticateJWT } from "../../tools/authenticateJWT";
+import { encrypt, decrypt } from "../../tools/encryption";
+
+interface UserRow {
+    id: number;
+    username: string;
+}
+
+interface PasswordRow {
+    id: number;
+    title: string;
+    username: string;
+    password: string;
+    url: string;
+    notes: string;
+    createdAt: string;
+    lastUpdatedAt?: string;
+    categoryId?: number;
+}
 
 export async function PUT(
     req: Request,
     { params }: { params: { id: string } }
-) {
+): Promise<Response> {
     try {
         const user = authenticateJWT(req);
         const {
@@ -16,9 +34,11 @@ export async function PUT(
             notes,
             categoryId,
         } = await req.json();
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -26,21 +46,21 @@ export async function PUT(
             });
         }
         const userId = userRows[0].id;
-        const passRows: any = await apiGet(
-            `SELECT * FROM snp_passwords WHERE id = '${params.id}' AND userId = '${userId}'`
-        );
+
+        const passQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
+        const passRows = (await apiGet(passQuery, [
+            params.id,
+            userId.toString(),
+        ])) as PasswordRow[];
         if (!passRows || passRows.length === 0) {
             return new Response(
                 JSON.stringify({ message: "Password not found" }),
-                {
-                    status: 404,
-                    headers: { "Content-Type": "application/json" },
-                }
+                { status: 404, headers: { "Content-Type": "application/json" } }
             );
         }
-        let encryptedPassword;
+
+        let encryptedPassword: string | null = null;
         if (password) {
-            const { encrypt } = await import("../../tools/encryption");
             encryptedPassword = encrypt(password);
         }
         const lastUpdatedAt = getCurrentTimestampISO();
@@ -66,11 +86,13 @@ export async function PUT(
             params.id,
             userId.toString(),
         ]);
-        const updatedRows: any = await apiGet(
-            `SELECT * FROM snp_passwords WHERE id = '${params.id}' AND userId = '${userId}'`
-        );
-        const { decrypt } = await import("../../tools/encryption");
-        const decryptedRows = (updatedRows as any[]).map((row) => ({
+
+        const updatedQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
+        const updatedRows = (await apiGet(updatedQuery, [
+            params.id,
+            userId.toString(),
+        ])) as PasswordRow[];
+        const decryptedRows = updatedRows.map((row) => ({
             ...row,
             password: decrypt(row.password),
         }));
@@ -78,7 +100,7 @@ export async function PUT(
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error updating password:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
@@ -90,12 +112,13 @@ export async function PUT(
 export async function DELETE(
     req: Request,
     { params }: { params: { id: string } }
-) {
+): Promise<Response> {
     try {
         const user = authenticateJWT(req);
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -103,25 +126,27 @@ export async function DELETE(
             });
         }
         const userId = userRows[0].id;
-        const passRows: any = await apiGet(
-            `SELECT * FROM snp_passwords WHERE id = '${params.id}' AND userId = '${userId}'`
-        );
+
+        const passQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
+        const passRows = (await apiGet(passQuery, [
+            params.id,
+            userId.toString(),
+        ])) as PasswordRow[];
         if (!passRows || passRows.length === 0) {
             return new Response(
                 JSON.stringify({ message: "Password not found" }),
-                {
-                    status: 404,
-                    headers: { "Content-Type": "application/json" },
-                }
+                { status: 404, headers: { "Content-Type": "application/json" } }
             );
         }
+
         const deleteQuery = `DELETE FROM snp_passwords WHERE id = ? AND userId = ?`;
         await apiDelete(deleteQuery, [params.id, userId.toString()]);
+
         return new Response(
             JSON.stringify({ message: "Password deleted successfully" }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error deleting password:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),

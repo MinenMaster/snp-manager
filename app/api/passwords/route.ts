@@ -1,14 +1,32 @@
 import { apiGet, apiPost } from "../database";
 import { getCurrentTimestampISO } from "../tools/timestamp";
 import { authenticateJWT } from "../tools/authenticateJWT";
+import { decrypt } from "../tools/encryption";
 
-export async function GET(req: Request) {
+interface UserRow {
+    id: number;
+    username: string;
+}
+
+interface PasswordRow {
+    id: number;
+    title: string;
+    username: string;
+    password: string;
+    url: string;
+    notes: string;
+    createdAt: string;
+    lastUpdatedAt?: string;
+    categoryId?: number;
+}
+
+export async function GET(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
-        // Retrieve user id
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -16,22 +34,25 @@ export async function GET(req: Request) {
             });
         }
         const userId = userRows[0].id;
-        // Retrieve the passwords for the user
-        const passwordRows: any = await apiGet(
-            `SELECT id, title, username, password, url, notes, createdAt, lastUpdatedAt, categoryId 
-       FROM snp_passwords WHERE userId = '${userId}'`
-        );
-        // Decrypt each password
-        const { decrypt } = await import("../tools/encryption");
-        const decryptedRows = (passwordRows as any[]).map((row) => ({
+
+        const passwordQuery = `
+      SELECT id, title, username, password, url, notes, createdAt, lastUpdatedAt, categoryId 
+      FROM snp_passwords WHERE userId = ?
+    `;
+        const passwordRows = (await apiGet(passwordQuery, [
+            userId.toString(),
+        ])) as PasswordRow[];
+
+        const decryptedRows = passwordRows.map((row) => ({
             ...row,
             password: decrypt(row.password),
         }));
+
         return new Response(JSON.stringify(decryptedRows), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error fetching passwords:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
@@ -40,7 +61,7 @@ export async function GET(req: Request) {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
         const {
@@ -57,10 +78,11 @@ export async function POST(req: Request) {
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
-        // Retrieve user id
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -68,10 +90,11 @@ export async function POST(req: Request) {
             });
         }
         const userId = userRows[0].id;
-        // Encrypt the password
+
         const { encrypt } = await import("../tools/encryption");
         const encryptedPassword = encrypt(password);
         const createdAt = getCurrentTimestampISO();
+
         const insertQuery = `
       INSERT INTO snp_passwords (userId, title, username, password, url, notes, categoryId, createdAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -86,11 +109,12 @@ export async function POST(req: Request) {
             categoryId ? categoryId.toString() : "",
             createdAt,
         ]);
+
         return new Response(
             JSON.stringify({ message: "Password created successfully" }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error creating password:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
