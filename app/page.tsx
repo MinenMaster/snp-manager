@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
+import { Copy } from "lucide-react";
 
 interface Category {
     id: number;
@@ -287,7 +288,7 @@ export default function LandingPage() {
 
         setIsPasswordModalOpen(true);
     };
-
+    // delete Password Handler
     const handleDeletePassword = async () => {
         const token = localStorage.getItem("authToken");
         if (!token) {
@@ -364,14 +365,24 @@ export default function LandingPage() {
         const errorData = await response.json();
         setError(errorData.message || "Failed to delete category.");
     }
-} catch (error) {
+    } catch (error) {
     setError("An error occurred while deleting the category.");
-}
+        }
     };
 // Logout Function
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         router.push("/login");
+    };
+
+    //copy function
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("password copied to clipboard")
+        } catch (err) {
+            console.error("failed to copy password");
+        }
     };
 
     return (
@@ -448,11 +459,11 @@ export default function LandingPage() {
                         <p>
                             <strong>Username:</strong>
                         </p>
-                        <p>{selectedPassword.username}</p>
+                        <p>{selectedPassword.username}<button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}><Copy size={15} /></button></p>
                         <p>
                             <strong>Password:</strong>
                         </p>
-                        <p>{selectedPassword.password}</p>
+                        <p>{selectedPassword.password}<button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}><Copy size={15} /></button></p>
                         <p>
                             <strong>URL:</strong>
                         </p>

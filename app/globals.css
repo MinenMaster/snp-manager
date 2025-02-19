@@ -54,6 +54,7 @@ button {
     background-color: white;
     color: black;
     transition: 0.2s;
+    font-size: 1.0 rem;
 }
 
 button:hover {
@@ -87,3 +88,5 @@ h1 {
 p {
     font-size: 1.2rem;
 }
+
+
