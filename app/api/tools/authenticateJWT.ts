@@ -1,8 +1,9 @@
+import { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-export const authenticateJWT = (req: Request) => {
+export const authenticateJWT = (req: NextRequest) => {
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
         throw new Error("Unauthorized");

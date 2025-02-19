@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from "next/server";
 import { apiGet, apiPost, apiDelete } from "../../database";
 import { getCurrentTimestampISO } from "../../tools/timestamp";
 import { authenticateJWT } from "../../tools/authenticateJWT";
@@ -21,11 +22,19 @@ interface PasswordRow {
 }
 
 export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
-): Promise<Response> {
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+    const { id } = await params;
     try {
         const user = authenticateJWT(req);
+        if (typeof user === "string" || !("username" in user)) {
+            return new NextResponse(
+                JSON.stringify({ message: "Invalid user token" }),
+                { status: 401, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
         const {
             title,
             username: pwdUsername,
@@ -40,20 +49,23 @@ export async function PUT(
             user.username,
         ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
-            return new Response(JSON.stringify({ message: "User not found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-            });
+            return new NextResponse(
+                JSON.stringify({ message: "User not found" }),
+                {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
         }
         const userId = userRows[0].id;
 
         const passQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
         const passRows = (await apiGet(passQuery, [
-            params.id,
+            id,
             userId.toString(),
         ])) as PasswordRow[];
         if (!passRows || passRows.length === 0) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Password not found" }),
                 { status: 404, headers: { "Content-Type": "application/json" } }
             );
@@ -83,26 +95,26 @@ export async function PUT(
             notes || null,
             categoryId || null,
             lastUpdatedAt,
-            params.id,
+            id,
             userId.toString(),
         ]);
 
         const updatedQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
         const updatedRows = (await apiGet(updatedQuery, [
-            params.id,
+            id,
             userId.toString(),
         ])) as PasswordRow[];
         const decryptedRows = updatedRows.map((row) => ({
             ...row,
             password: decrypt(row.password),
         }));
-        return new Response(JSON.stringify(decryptedRows), {
+        return new NextResponse(JSON.stringify(decryptedRows), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
     } catch (err: unknown) {
         console.error("Error updating password:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
@@ -110,45 +122,56 @@ export async function PUT(
 }
 
 export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
-): Promise<Response> {
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+    const { id } = await params;
     try {
         const user = authenticateJWT(req);
+        if (typeof user === "string" || !("username" in user)) {
+            return new NextResponse(
+                JSON.stringify({ message: "Invalid user token" }),
+                { status: 401, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
         const userRows = (await apiGet(userIdQuery, [
             user.username,
         ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
-            return new Response(JSON.stringify({ message: "User not found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-            });
+            return new NextResponse(
+                JSON.stringify({ message: "User not found" }),
+                {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
         }
         const userId = userRows[0].id;
 
         const passQuery = `SELECT * FROM snp_passwords WHERE id = ? AND userId = ?`;
         const passRows = (await apiGet(passQuery, [
-            params.id,
+            id,
             userId.toString(),
         ])) as PasswordRow[];
         if (!passRows || passRows.length === 0) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Password not found" }),
                 { status: 404, headers: { "Content-Type": "application/json" } }
             );
         }
 
         const deleteQuery = `DELETE FROM snp_passwords WHERE id = ? AND userId = ?`;
-        await apiDelete(deleteQuery, [params.id, userId.toString()]);
+        await apiDelete(deleteQuery, [id, userId.toString()]);
 
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Password deleted successfully" }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
     } catch (err: unknown) {
         console.error("Error deleting password:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );

@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getCurrentTimestampISO } from "../tools/timestamp";
 import { apiGet, apiPost } from "../database";
@@ -11,12 +12,12 @@ interface User {
     lastLogin?: string;
 }
 
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const { username, password, email } = await req.json();
 
         if (!username || !password || !email) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({
                     message: "Username, password and email are required",
                 }),
@@ -30,7 +31,7 @@ export async function POST(req: Request): Promise<Response> {
             email,
         ])) as User[];
         if (existingUsers.length > 0) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Username or email already exists" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
@@ -55,7 +56,7 @@ export async function POST(req: Request): Promise<Response> {
             id: number;
         }[];
         if (!userRows || userRows.length === 0) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({
                     message: "User not found after registration",
                 }),
@@ -70,13 +71,13 @@ export async function POST(req: Request): Promise<Response> {
     `;
         await apiPost(insertSettingsQuery, [userId.toString()]);
 
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "User registered successfully" }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
     } catch (err: unknown) {
         console.error("Error registering user:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );

@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from "next/server";
 import { apiGet, apiPost } from "../database";
 import { getCurrentTimestampISO } from "../tools/timestamp";
 import { authenticateJWT } from "../tools/authenticateJWT";
@@ -20,18 +21,28 @@ interface PasswordRow {
     categoryId?: number;
 }
 
-export async function GET(req: Request): Promise<Response> {
+export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
+        if (typeof user === "string" || !("username" in user)) {
+            return new NextResponse(
+                JSON.stringify({ message: "Invalid user token" }),
+                { status: 401, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
         const userRows = (await apiGet(userIdQuery, [
             user.username,
         ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
-            return new Response(JSON.stringify({ message: "User not found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-            });
+            return new NextResponse(
+                JSON.stringify({ message: "User not found" }),
+                {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
         }
         const userId = userRows[0].id;
 
@@ -48,22 +59,29 @@ export async function GET(req: Request): Promise<Response> {
             password: decrypt(row.password),
         }));
 
-        return new Response(JSON.stringify(decryptedRows), {
+        return new NextResponse(JSON.stringify(decryptedRows), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
     } catch (err: unknown) {
         console.error("Error fetching passwords:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
     }
 }
 
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
+        if (typeof user === "string" || !("username" in user)) {
+            return new NextResponse(
+                JSON.stringify({ message: "Invalid user token" }),
+                { status: 401, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
         const {
             title,
             username: pwdUsername,
@@ -73,7 +91,7 @@ export async function POST(req: Request): Promise<Response> {
             categoryId,
         } = await req.json();
         if (!title || !password) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Title and password are required" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
@@ -84,10 +102,13 @@ export async function POST(req: Request): Promise<Response> {
             user.username,
         ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
-            return new Response(JSON.stringify({ message: "User not found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-            });
+            return new NextResponse(
+                JSON.stringify({ message: "User not found" }),
+                {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" },
+                }
+            );
         }
         const userId = userRows[0].id;
 
@@ -110,13 +131,13 @@ export async function POST(req: Request): Promise<Response> {
             createdAt,
         ]);
 
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Password created successfully" }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
     } catch (err: unknown) {
         console.error("Error creating password:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );

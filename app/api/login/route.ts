@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import {
@@ -17,12 +18,12 @@ interface User {
     lastLogin?: string;
 }
 
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const { identifier, password } = await req.json();
 
         if (!identifier || !password) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({
                     message: "Identifier and password are required",
                 }),
@@ -40,7 +41,7 @@ export async function POST(req: Request): Promise<Response> {
             identifier,
         ])) as User[];
         if (!users || users.length === 0) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Invalid credentials" }),
                 {
                     status: 400,
@@ -56,7 +57,7 @@ export async function POST(req: Request): Promise<Response> {
             user.hashed_password
         );
         if (!validPassword) {
-            return new Response(
+            return new NextResponse(
                 JSON.stringify({ message: "Invalid credentials" }),
                 {
                     status: 400,
@@ -84,13 +85,13 @@ export async function POST(req: Request): Promise<Response> {
         const logQuery = `INSERT INTO snp_login_logs (username, timestamp) VALUES (?, ?)`;
         await apiPost(logQuery, [user.username, currentTimestampISO]);
 
-        return new Response(JSON.stringify({ token }), {
+        return new NextResponse(JSON.stringify({ token }), {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
     } catch (err: unknown) {
         console.error("Error logging in user:", err);
-        return new Response(
+        return new NextResponse(
             JSON.stringify({ message: "Internal server error" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         );
