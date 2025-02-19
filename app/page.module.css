@@ -228,6 +228,15 @@
     background-color: #f0f0f0;
 }
 
+.copyButton {
+    border: none;
+    margin-left: 5px;
+}
+
+.copyButton:hover {
+    background-color: grey;
+}
+
 .activeCategory {
     background-color: blue !important;
     color: white;
