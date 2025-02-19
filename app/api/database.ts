@@ -49,14 +49,14 @@ export const apiPut = async (query: string, values: string[]) => {
     });
 };
 
-export const apiDelete = async (query: string) => {
+export const apiDelete = async (query: string, values: string[] = []) => {
     return await new Promise((resolve, reject) => {
-        db.run(query, function (err) {
+        db.run(query, values, function (err) {
             if (err) {
                 console.log(err);
-                reject(err);
+                return reject(err);
             }
-            resolve(null);
+            return resolve(null);
         });
     });
 };
