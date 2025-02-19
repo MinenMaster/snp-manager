@@ -2,7 +2,16 @@ import bcrypt from "bcryptjs";
 import { getCurrentTimestampISO } from "../tools/timestamp";
 import { apiGet, apiPost } from "../database";
 
-export async function POST(req: Request) {
+interface User {
+    id: number;
+    username: string;
+    hashed_password: string;
+    email: string;
+    createdAt?: string;
+    lastLogin?: string;
+}
+
+export async function POST(req: Request): Promise<Response> {
     try {
         const { username, password, email } = await req.json();
 
@@ -15,9 +24,11 @@ export async function POST(req: Request) {
             );
         }
 
-        // Check for existing user
-        const existingUserQuery = `SELECT * FROM snp_users WHERE username = '${username}' OR email = '${email}'`;
-        const existingUsers: any = await apiGet(existingUserQuery);
+        const existingUserQuery = `SELECT * FROM snp_users WHERE username = ? OR email = ?`;
+        const existingUsers = (await apiGet(existingUserQuery, [
+            username,
+            email,
+        ])) as User[];
         if (existingUsers.length > 0) {
             return new Response(
                 JSON.stringify({ message: "Username or email already exists" }),
@@ -25,11 +36,9 @@ export async function POST(req: Request) {
             );
         }
 
-        // Hash the password and get current timestamp
         const hashedPassword = await bcrypt.hash(password, 10);
         const createdAt = getCurrentTimestampISO();
 
-        // Insert the new user
         const insertUserQuery = `
       INSERT INTO snp_users (username, hashed_password, email, createdAt)
       VALUES (?, ?, ?, ?)
@@ -41,9 +50,10 @@ export async function POST(req: Request) {
             createdAt,
         ]);
 
-        // Retrieve the inserted user's id
-        const userIdQuery = `SELECT id FROM snp_users WHERE username = '${username}'`;
-        const userRows: any = await apiGet(userIdQuery);
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [username])) as {
+            id: number;
+        }[];
         if (!userRows || userRows.length === 0) {
             return new Response(
                 JSON.stringify({
@@ -54,7 +64,6 @@ export async function POST(req: Request) {
         }
         const userId = userRows[0].id;
 
-        // Create default settings for the new user
         const insertSettingsQuery = `
       INSERT INTO snp_settings (userid, twofactorenabled, nextreminder)
       VALUES (?, 'false', NULL)
@@ -65,7 +74,7 @@ export async function POST(req: Request) {
             JSON.stringify({ message: "User registered successfully" }),
             { status: 201, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error registering user:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),

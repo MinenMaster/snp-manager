@@ -13,14 +13,14 @@ export const db = new sqlite3.Database(
     }
 );
 
-export const apiGet = async (query: string) => {
+export const apiGet = async (query: string, values: string[] = []) => {
     return await new Promise((resolve, reject) => {
-        db.all(query, (err: Error, row) => {
+        db.all(query, values, (err: Error, rows: unknown) => {
             if (err) {
-                console.log(err);
+                console.error(err);
                 return reject(err);
             }
-            return resolve(row);
+            return resolve(rows);
         });
     });
 };

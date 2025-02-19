@@ -1,10 +1,21 @@
 import { apiGet, apiPut, apiDelete } from "../../database";
 import { authenticateJWT } from "../../tools/authenticateJWT";
 
+interface UserRow {
+    id: number;
+    username: string;
+}
+
+interface CategoryRow {
+    id: number;
+    name: string;
+    userId: number;
+}
+
 export async function PUT(
     req: Request,
     { params }: { params: { id: string } }
-) {
+): Promise<Response> {
     try {
         const user = authenticateJWT(req);
         const { name } = await req.json();
@@ -15,8 +26,10 @@ export async function PUT(
             );
         }
 
-        const userIdQuery = `SELECT id FROM snp_users WHERE username = '${user.username}'`;
-        const userRows: any = await apiGet(userIdQuery);
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -25,8 +38,11 @@ export async function PUT(
         }
         const userId = userRows[0].id;
 
-        const categoryQuery = `SELECT * FROM snp_categories WHERE id = '${params.id}' AND userId = '${userId}'`;
-        const categoryRows: any = await apiGet(categoryQuery);
+        const categoryQuery = `SELECT * FROM snp_categories WHERE id = ? AND userId = ?`;
+        const categoryRows = (await apiGet(categoryQuery, [
+            params.id,
+            userId.toString(),
+        ])) as CategoryRow[];
         if (!categoryRows || categoryRows.length === 0) {
             return new Response(
                 JSON.stringify({ message: "Category not found" }),
@@ -41,7 +57,7 @@ export async function PUT(
             JSON.stringify({ message: "Category updated successfully" }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error updating category:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
@@ -53,11 +69,13 @@ export async function PUT(
 export async function DELETE(
     req: Request,
     { params }: { params: { id: string } }
-) {
+): Promise<Response> {
     try {
         const user = authenticateJWT(req);
-        const userIdQuery = `SELECT id FROM snp_users WHERE username = '${user.username}'`;
-        const userRows: any = await apiGet(userIdQuery);
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const userRows = (await apiGet(userIdQuery, [
+            user.username,
+        ])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -67,11 +85,10 @@ export async function DELETE(
         const userId = userRows[0].id;
 
         const categoryQuery = `SELECT * FROM snp_categories WHERE id = ? AND userId = ?`;
-        const categoryRows: any = await apiGet(
-            categoryQuery
-                .replace("?", `'${params.id}'`)
-                .replace("?", `'${userId}'`)
-        );
+        const categoryRows = (await apiGet(categoryQuery, [
+            params.id,
+            userId.toString(),
+        ])) as CategoryRow[];
         if (!categoryRows || categoryRows.length === 0) {
             return new Response(
                 JSON.stringify({ message: "Category not found" }),
@@ -86,7 +103,7 @@ export async function DELETE(
             JSON.stringify({ message: "Category deleted successfully" }),
             { status: 200, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error deleting category:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),

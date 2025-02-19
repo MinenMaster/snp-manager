@@ -1,14 +1,22 @@
 import { apiGet, apiPost } from "../database";
-import { getCurrentTimestampISO } from "../tools/timestamp";
 import { authenticateJWT } from "../tools/authenticateJWT";
 
-export async function GET(req: Request) {
+interface UserRow {
+    id: number;
+}
+
+interface SettingsRow {
+    twofactorenabled: boolean;
+    nextreminder: string | null;
+}
+
+export async function GET(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
-        // Look up the user id based on username
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+        const userRows = (await apiGet(
+            `SELECT id FROM snp_users WHERE username = ?`,
+            [user.username]
+        )) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -16,10 +24,10 @@ export async function GET(req: Request) {
             });
         }
         const userId = userRows[0].id;
-        // Retrieve settings for the user
-        const settingsRows: any = await apiGet(
-            `SELECT twofactorenabled, nextreminder FROM snp_settings WHERE userid = '${userId}'`
-        );
+        const settingsRows = (await apiGet(
+            `SELECT twofactorenabled, nextreminder FROM snp_settings WHERE userid = ?`,
+            [userId.toString()]
+        )) as SettingsRow[];
         if (!settingsRows || settingsRows.length === 0) {
             return new Response(
                 JSON.stringify({ message: "Settings not found" }),
@@ -33,7 +41,7 @@ export async function GET(req: Request) {
             status: 200,
             headers: { "Content-Type": "application/json" },
         });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error fetching settings:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
@@ -42,21 +50,20 @@ export async function GET(req: Request) {
     }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: Request): Promise<Response> {
     try {
         const user = authenticateJWT(req);
         const { twofactorenabled, nextreminder } = await req.json();
-        // Validate input (you might add more checks as needed)
         if (twofactorenabled === undefined) {
             return new Response(
                 JSON.stringify({ message: "twofactorenabled is required" }),
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
-        // Retrieve the user's id
-        const userRows: any = await apiGet(
-            `SELECT id FROM snp_users WHERE username = '${user.username}'`
-        );
+        const userRows = (await apiGet(
+            `SELECT id FROM snp_users WHERE username = ?`,
+            [user.username]
+        )) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new Response(JSON.stringify({ message: "User not found" }), {
                 status: 404,
@@ -64,7 +71,6 @@ export async function PUT(req: Request) {
             });
         }
         const userId = userRows[0].id;
-        // Update the settings (using a parameterized query)
         const updateQuery = `UPDATE snp_settings SET twofactorenabled = ?, nextreminder = ? WHERE userid = ?`;
         await apiPost(updateQuery, [
             twofactorenabled.toString(),
@@ -73,12 +79,9 @@ export async function PUT(req: Request) {
         ]);
         return new Response(
             JSON.stringify({ message: "Settings updated successfully" }),
-            {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            }
+            { status: 200, headers: { "Content-Type": "application/json" } }
         );
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error updating settings:", err);
         return new Response(
             JSON.stringify({ message: "Internal server error" }),
