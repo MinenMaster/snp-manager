@@ -56,7 +56,7 @@ export default function LandingPage() {
     (password) => password.id === selectedPasswordId
   );
 
-  const selectedCatergory = categories.find(
+  const selectedCategory = categories.find(
     (categories) => categories.id === selectedCategoryId
   );
 
@@ -238,32 +238,38 @@ export default function LandingPage() {
   };
 
   const handleEditCategory = async () => {
-    if (selectedCatergory) {
-      setNewCategory(selectedCatergory.name);
-    }
+    if (!selectedCategoryId || !newCategory) return;
 
     const token = localStorage.getItem("authToken");
     if (!token) {
-      setError("Your are not logged in.");
+      setError("You are not logged in.");
       return;
     }
+
     try {
       const response = await fetch(
         `https://snp-api.vercel.app/categories/${selectedCategoryId}`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ name: newCategory }),
         }
       );
+
       if (response.ok) {
-        const filteredCategories = categories.filter(
-          (category) => category.id !== selectedCategoryId
+        const updatedCategory = await response.json();
+
+        setCategories((prevCategories) =>
+          prevCategories.map((category) =>
+            category.id === selectedCategoryId ? updatedCategory : category
+          )
         );
-        setCategories(filteredCategories);
-        setSelectedCategoryId(null);
+
+        setNewCategory(updatedCategory.name);
+        setSelectedCategoryId(updatedCategory.id);
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Error editing category.");
@@ -295,7 +301,7 @@ export default function LandingPage() {
       const response = await fetch(
         `https://snp-api.vercel.app/passwords/${selectedPasswordId}`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -443,7 +449,12 @@ export default function LandingPage() {
                     : ""
                 }`}
               >
-                {/* <button onClick={handleEditCategory} className={Styles.createButton}>Edit</button> */}
+                <button
+                  onClick={handleEditCategory}
+                  className={Styles.createButton}
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() => handleDeleteCategory(category.id)}
                   className={Styles.deleteButtonCategories}
@@ -458,7 +469,7 @@ export default function LandingPage() {
             <input
               type="text"
               placeholder="New Category"
-              value={newCategory}
+              value={newCategory || ""}
               onChange={(e) => setNewCategory(e.target.value)}
               className={Styles.input}
             />
@@ -469,9 +480,6 @@ export default function LandingPage() {
               Add
             </button>
           </div>
-          <button onClick={handleEditCategory} className={Styles.createButton}>
-            Edit
-          </button>
           {error && <p className={Styles.error}>{error}</p>}
           {success && <p className={Styles.success}>{success}</p>}
         </aside>
@@ -514,7 +522,7 @@ export default function LandingPage() {
               {selectedPassword.username}
               <button
                 className={Styles.copyButton}
-                onClick={() => copyToClipboard(selectedPassword.password)}
+                onClick={() => copyToClipboard(selectedPassword.username)}
               >
                 <Copy size={15} />
               </button>
