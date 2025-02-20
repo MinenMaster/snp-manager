@@ -237,6 +237,7 @@ export default function LandingPage() {
     }
   };
 
+  //DO NOT TOUCH THIS CODE IT WORKS (NOBODY KNOWS WHY)
   const handleEditCategory = async () => {
     if (!selectedCategoryId || !newCategory) return;
 
