@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get next version
-        uses: thenativebit/get-next-version@2.6.3
+        uses: thenativeweb/get-next-version@2.6.3
         id: get_next_version
       - name: Create new realease
         if: ${{ steps.get_next_version.outputs.hasNextVersion == 'true'}}
