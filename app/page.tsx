@@ -319,6 +319,7 @@ export default function LandingPage() {
     setIsPasswordModalOpen(true);
   };
 
+  //Delete Password Function
   const handleDeletePassword = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -353,6 +354,7 @@ export default function LandingPage() {
     }
   };
 
+  //Delete Category Function
   const handleDeleteCategory = async (categoryId: number) => {
     const token = localStorage.getItem("authToken");
     if (!token) {
