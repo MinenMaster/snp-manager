@@ -260,16 +260,19 @@ export default function LandingPage() {
       );
 
       if (response.ok) {
-        const updatedCategory = await response.json();
+        const updatedCategory = { name: newCategory };
+
+        console.log("updatedCategory", updatedCategory);
 
         setCategories((prevCategories) =>
           prevCategories.map((category) =>
-            category.id === selectedCategoryId ? updatedCategory : category
+            category.id === selectedCategoryId
+              ? { ...category, ...updatedCategory }
+              : category
           )
         );
 
         setNewCategory(updatedCategory.name);
-        setSelectedCategoryId(updatedCategory.id);
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Error editing category.");
