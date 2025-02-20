@@ -238,7 +238,7 @@
 }
 
 .activeCategory {
-    background-color: blue !important; /*#0060ff*/
+    background-color: #0060ff !important; /**/
     color: white;
     font-weight: bold;
 }
