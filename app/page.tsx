@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
-import { Copy, Eye, EyeOff} from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 
 interface Category {
     id: number;
@@ -67,7 +67,7 @@ export default function LandingPage() {
 
             try {
                 const response = await fetch(
-                    "https://snp-api.vercel.app/auth",
+                    "https://localhost:3000/api/auth",
                     {
                         method: "GET",
                         headers: {
@@ -117,6 +117,7 @@ export default function LandingPage() {
                 }
             } catch (err) {
                 console.error("Error fetching data:", err);
+                router.push("/login");
             }
         };
 
@@ -173,7 +174,6 @@ export default function LandingPage() {
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
     };
-
 
     const handleCategoryClick = (categoryId: number) => {
         setSelectedCategoryId(categoryId);
@@ -330,7 +330,7 @@ export default function LandingPage() {
         }
     };
 
-        const handleDeleteCategory = async (categoryId: number) => {
+    const handleDeleteCategory = async (categoryId: number) => {
         const token = localStorage.getItem("authToken");
         if (!token) {
             router.push("/login");
@@ -341,42 +341,53 @@ export default function LandingPage() {
         try {
             const passwordsToDelete = passwords.filter(
                 (password) => password.categoryId === categoryId
-            )
+            );
 
             for (const password of passwordsToDelete) {
-                await fetch(`https://snp-api.vercel.app/passwords/${password.id}`, {
+                await fetch(
+                    `https://snp-api.vercel.app/passwords/${password.id}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+            }
+
+            const response = await fetch(
+                `https://snp-api.vercel.app/categories/${categoryId}`,
+                {
                     method: "DELETE",
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
-            });
-        }   
+                }
+            );
 
-        const response = await fetch(
-            `https://snp-api.vercel.app/categories/${categoryId}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
+            if (response.ok) {
+                setPasswords(
+                    passwords.filter(
+                        (password) => password.categoryId !== categoryId
+                    )
+                );
+                setCategories(
+                    categories.filter((category) => category.id !== categoryId)
+                );
+                setSuccess(
+                    "Category and associated passwords deleted successfully."
+                );
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || "Failed to delete category.");
             }
-        );
-
-        if (response.ok) {
-            setPasswords(passwords.filter((password) => password.categoryId !== categoryId));
-            setCategories(categories.filter((category) => category.id !== categoryId));
-            setSuccess("Category and associated passwords deleted successfully.");
-    } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to delete category.");
-    }
-    } catch (error) {
-    setError("An error occurred while deleting the category.");
+        } catch (error) {
+            setError("An error occurred while deleting the category.");
         }
     };
-// Logout Function
+    // Logout Function
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         router.push("/login");
@@ -386,7 +397,7 @@ export default function LandingPage() {
     const copyToClipboard = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text);
-            alert("password copied to clipboard")
+            alert("password copied to clipboard");
         } catch (err) {
             console.error("failed to copy password");
         }
@@ -396,7 +407,9 @@ export default function LandingPage() {
         <div className={Styles.container}>
             <header className={Styles.header}>
                 <h1 className={Styles.title}>SNP-Manager</h1>
-                <button onClick={handleLogout} className={Styles.logoutButton}>Logout</button>
+                <button onClick={handleLogout} className={Styles.logoutButton}>
+                    Logout
+                </button>
             </header>
             <div className={Styles.content}>
                 <aside className={Styles.menu}>
@@ -406,9 +419,20 @@ export default function LandingPage() {
                             <li
                                 key={category.id || index}
                                 onClick={() => handleCategoryClick(category.id)}
-                                className={`${Styles.categoryItem} ${selectedCategoryId === category.id ? Styles.activeCategory : ""}`}
+                                className={`${Styles.categoryItem} ${
+                                    selectedCategoryId === category.id
+                                        ? Styles.activeCategory
+                                        : ""
+                                }`}
                             >
-                                <button onClick={() => handleDeleteCategory(category.id)} className={Styles.deleteButtonCategories}>X</button>
+                                <button
+                                    onClick={() =>
+                                        handleDeleteCategory(category.id)
+                                    }
+                                    className={Styles.deleteButtonCategories}
+                                >
+                                    X
+                                </button>
                                 {category.name}
                             </li>
                         ))}
@@ -464,37 +488,65 @@ export default function LandingPage() {
                     <div className={Styles.passwordDetailsModal}>
                         <h3>{selectedPassword.title}</h3>
 
-                        <p><strong>Username:</strong></p>
+                        <p>
+                            <strong>Username:</strong>
+                        </p>
                         <p>
                             {selectedPassword.username}
-                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.username)}>
+                            <button
+                                className={Styles.copyButton}
+                                onClick={() =>
+                                    copyToClipboard(selectedPassword.username)
+                                }
+                            >
                                 <Copy size={15} />
                             </button>
                         </p>
 
-                        <p><strong>Password:</strong></p>
                         <p>
-                            {isPasswordVisible ? selectedPassword.password : "*****"}
-                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}>
+                            <strong>Password:</strong>
+                        </p>
+                        <p>
+                            {isPasswordVisible
+                                ? selectedPassword.password
+                                : "*****"}
+                            <button
+                                className={Styles.copyButton}
+                                onClick={() =>
+                                    copyToClipboard(selectedPassword.password)
+                                }
+                            >
                                 <Copy size={15} />
                             </button>
-                            <button onClick={togglePasswordVisibility} className={Styles.isVisible}>
-                                {isPasswordVisible ? <EyeOff size={15} /> : <Eye size={15}/>}
+                            <button
+                                onClick={togglePasswordVisibility}
+                                className={Styles.isVisible}
+                            >
+                                {isPasswordVisible ? (
+                                    <EyeOff size={15} />
+                                ) : (
+                                    <Eye size={15} />
+                                )}
                             </button>
                         </p>
 
-                        <p><strong>URL:</strong></p>
+                        <p>
+                            <strong>URL:</strong>
+                        </p>
                         <p>{selectedPassword.url}</p>
 
-                        <p><strong>Notes:</strong></p>
+                        <p>
+                            <strong>Notes:</strong>
+                        </p>
                         <p>{selectedPassword.notes}</p>
 
-                        <button onClick={() => setSelectedPasswordId(null)}>Close</button>
+                        <button onClick={() => setSelectedPasswordId(null)}>
+                            Close
+                        </button>
                         <button onClick={handleEditPassword}>Edit</button>
                         <button onClick={handleDeletePassword}>Delete</button>
                     </div>
                 )}
-
 
                 {isPasswordModalOpen && (
                     <div className={Styles.modal}>
