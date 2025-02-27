@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "next dev --experimental-https",
         "build": "next build",
-        "start": "next start",
+        "start": "next start --experimental-https",
         "lint": "npx eslint app",
         "lint:api": "npx eslint app/api",
         "migrate": "tsx ./app/api/migrations.ts"
@@ -18,7 +18,6 @@
         "jsonwebtoken": "^9.0.2",
         "lucide-react": "^0.476.0",
         "moment-timezone": "^0.5.47",
-        "lucide-react": "^0.475.0",
         "next": "^15.1.7",
         "nextjs": "file:",
         "react": "^19.0.0",
