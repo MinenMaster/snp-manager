@@ -329,7 +329,7 @@ export default function LandingPage() {
     setIsPasswordModalOpen(true);
   };
 
-  //Delete Password via Delete method
+  //Delete Password via Delete Method
   const handleDeletePassword = async () => {
     const token = localStorage.getItem("authToken");
     if (!token) {
