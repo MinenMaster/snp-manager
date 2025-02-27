@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get next version
+        uses: thenativeweb/get-next-version@2.6.3
+        id: get_next_version
+      - name: Create new realease
+        if: ${{ steps.get_next_version.outputs.hasNextVersion == 'true'}}
+        run: |
+          NEXT_VERSION=${{ steps.get_next_version.outputs.version }}
+          git tag $NEXT_VERSION
+          git push origin $NEXT_VERSION
