@@ -228,17 +228,17 @@
     background-color: #f0f0f0;
 }
 
-.copyButton {
+.copyButton, .isVisible {
     border: none;
     margin-left: 5px;
 }
 
-.copyButton:hover {
+.copyButton:hover, .isVisible:hover {
     background-color: grey;
 }
 
 .activeCategory {
-    background-color: blue !important;
+    background-color: #0060ff !important; /**/
     color: white;
     font-weight: bold;
 }

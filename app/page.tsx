@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
-import { Copy } from "lucide-react";
+import { Copy, Eye, EyeOff} from "lucide-react";
 
 interface Category {
   id: number;
@@ -165,6 +165,13 @@ export default function LandingPage() {
       setError("An error occurred. Please try again later.");
     }
   };
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+    };
+
 
   const handleCategoryClick = (categoryId: number) => {
     setSelectedCategoryId(categoryId);
@@ -516,46 +523,41 @@ export default function LandingPage() {
           </button>
         </main>
 
-        {selectedPassword && (
-          <div className={Styles.passwordDetailsModal}>
-            <h3>{selectedPassword.title}</h3>
-            <p>
-              <strong>Username:</strong>
-            </p>
-            <p>
-              {selectedPassword.username}
-              <button
-                className={Styles.copyButton}
-                onClick={() => copyToClipboard(selectedPassword.username)}
-              >
-                <Copy size={15} />
-              </button>
-            </p>
-            <p>
-              <strong>Password:</strong>
-            </p>
-            <p>
-              {selectedPassword.password}
-              <button
-                className={Styles.copyButton}
-                onClick={() => copyToClipboard(selectedPassword.password)}
-              >
-                <Copy size={15} />
-              </button>
-            </p>
-            <p>
-              <strong>URL:</strong>
-            </p>
-            <p>{selectedPassword.url}</p>
-            <p>
-              <strong>Notes:</strong>
-            </p>
-            <p>{selectedPassword.notes}</p>
-            <button onClick={() => setSelectedPasswordId(null)}>Close</button>
-            <button onClick={handleEditPassword}>Edit</button>
-            <button onClick={handleDeletePassword}>Delete</button>
-          </div>
-        )}
+                {selectedPassword && (
+                    <div className={Styles.passwordDetailsModal}>
+                        <h3>{selectedPassword.title}</h3>
+
+                        <p><strong>Username:</strong></p>
+                        <p>
+                            {selectedPassword.username}
+                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.username)}>
+                                <Copy size={15} />
+                            </button>
+                        </p>
+
+                        <p><strong>Password:</strong></p>
+                        <p>
+                            {isPasswordVisible ? selectedPassword.password : "*****"}
+                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}>
+                                <Copy size={15} />
+                            </button>
+                            <button onClick={togglePasswordVisibility} className={Styles.isVisible}>
+                                {isPasswordVisible ? <EyeOff size={15} /> : <Eye size={15}/>}
+                            </button>
+                        </p>
+
+                        <p><strong>URL:</strong></p>
+                        <p>{selectedPassword.url}</p>
+
+                        <p><strong>Notes:</strong></p>
+                        <p>{selectedPassword.notes}</p>
+
+                        <button onClick={() => setSelectedPasswordId(null)}>Close</button>
+                        <button onClick={handleEditPassword}>Edit</button>
+                        <button onClick={handleDeletePassword}>Delete</button>
+                    </div>
+                )}
+
 
         {isPasswordModalOpen && (
           <div className={Styles.modal}>
