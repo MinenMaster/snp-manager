@@ -17,7 +17,7 @@ export const authenticateJWT = (req: NextRequest) => {
     try {
         const user = jwt.verify(token, JWT_SECRET);
         return user;
-    } catch (error) {
+    } catch {
         throw new Error("Forbidden");
     }
 };
