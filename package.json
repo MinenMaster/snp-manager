@@ -8,13 +8,15 @@
         "start": "next start --experimental-https",
         "lint": "npx eslint app",
         "lint:api": "npx eslint app/api",
-        "migrate": "tsx ./app/api/migrations.ts"
+        "migrate": "tsx ./app/api/migrations.ts",
+        "test": "jest"
     },
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.8.1",
         "bcryptjs": "^3.0.2",
         "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
         "jsonwebtoken": "^9.0.2",
         "lucide-react": "^0.476.0",
         "moment-timezone": "^0.5.47",
@@ -28,6 +30,10 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.21.0",
+        "@testing-library/dom": "^10.4.0",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.2.0",
+        "@types/jest": "^29.5.14",
         "@types/jsonwebtoken": "^9.0.9",
         "@types/moment-timezone": "^0.5.13",
         "@types/next": "^8.0.7",
@@ -37,8 +43,11 @@
         "eslint": "^9.21.0",
         "eslint-plugin-react": "^7.37.4",
         "globals": "^15.15.0",
+        "jest": "^29.7.0",
+        "jest-environment-jsdom": "^29.7.0",
         "postcss": "^8.5.3",
         "tailwindcss": "^3.4.17",
+        "ts-node": "^10.9.2",
         "typescript": "^5.7.3",
         "typescript-eslint": "^8.25.0"
     }
