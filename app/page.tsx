@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
-import { Copy, Eye, EyeOff} from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 
 interface Category {
   id: number;
@@ -69,14 +69,17 @@ export default function LandingPage() {
         return;
       }
 
-      try {
-        const response = await fetch("https://snp-api.vercel.app/auth", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+            try {
+                const response = await fetch(
+                    "https://localhost:3000/api/auth",
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
 
         if (response.status !== 200) {
           router.push("/login");
@@ -112,14 +115,15 @@ export default function LandingPage() {
           }
         );
 
-        if (passwordsResponse.ok) {
-          const passwordsData = await passwordsResponse.json();
-          setPasswords(passwordsData);
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
+                if (passwordsResponse.ok) {
+                    const passwordsData = await passwordsResponse.json();
+                    setPasswords(passwordsData);
+                }
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                router.push("/login");
+            }
+        };
 
     checkAuthAndFetchCategoriesAndPasswords();
   }, [router]);
@@ -172,11 +176,10 @@ export default function LandingPage() {
         setIsPasswordVisible(!isPasswordVisible);
     };
 
-
-  const handleCategoryClick = (categoryId: number) => {
-    setSelectedCategoryId(categoryId);
-    setNewPassword({ ...newPassword, categoryId });
-  };
+    const handleCategoryClick = (categoryId: number) => {
+        setSelectedCategoryId(categoryId);
+        setNewPassword({ ...newPassword, categoryId });
+    };
 
   const handleCreatePassword = async () => {
     setError("");
@@ -371,270 +374,308 @@ export default function LandingPage() {
     }
   };
 
-  //Delete Category Function
-  const handleDeleteCategory = async (categoryId: number) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      router.push("/login");
-      setError("You are not logged in.");
-      return;
-    }
-
-    try {
-      const passwordsToDelete = passwords.filter(
-        (password) => password.categoryId === categoryId
-      );
-
-      for (const password of passwordsToDelete) {
-        await fetch(`https://snp-api.vercel.app/passwords/${password.id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-      }
-
-      const response = await fetch(
-        `https://snp-api.vercel.app/categories/${categoryId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+    const handleDeleteCategory = async (categoryId: number) => {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            router.push("/login");
+            setError("You are not logged in.");
+            return;
         }
-      );
 
-      if (response.ok) {
-        setPasswords(
-          passwords.filter((password) => password.categoryId !== categoryId)
-        );
-        setCategories(
-          categories.filter((category) => category.id !== categoryId)
-        );
-        setSuccess("Category and associated passwords deleted successfully.");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Failed to delete category.");
-      }
-    } catch (error) {
-      setError("An error occurred while deleting the category.");
-    }
-  };
-  // Logout Function
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    router.push("/login");
-  };
+        try {
+            const passwordsToDelete = passwords.filter(
+                (password) => password.categoryId === categoryId
+            );
 
-  //copy function
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert("password copied to clipboard");
-    } catch (err) {
-      console.error("failed to copy password");
-    }
-  };
+            for (const password of passwordsToDelete) {
+                await fetch(
+                    `https://snp-api.vercel.app/passwords/${password.id}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+            }
 
-  return (
-    <div className={Styles.container}>
-      <header className={Styles.header}>
-        <h1 className={Styles.title}>SNP-Manager</h1>
-        <button onClick={handleLogout} className={Styles.logoutButton}>
-          Logout
-        </button>
-      </header>
-      <div className={Styles.content}>
-        <aside className={Styles.menu}>
-          <h2>Categories</h2>
-          <ul>
-            {categories.map((category, index) => (
-              <li
-                key={category.id || index}
-                onClick={() => handleCategoryClick(category.id)}
-                className={`${Styles.categoryItem} ${
-                  selectedCategoryId === category.id
-                    ? Styles.activeCategory
-                    : ""
-                }`}
-              >
-                <button
-                  onClick={handleEditCategory}
-                  className={Styles.createButton}
-                >
-                  Edit
+            const response = await fetch(
+                `https://snp-api.vercel.app/categories/${categoryId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setPasswords(
+                    passwords.filter(
+                        (password) => password.categoryId !== categoryId
+                    )
+                );
+                setCategories(
+                    categories.filter((category) => category.id !== categoryId)
+                );
+                setSuccess(
+                    "Category and associated passwords deleted successfully."
+                );
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || "Failed to delete category.");
+            }
+        } catch (error) {
+            setError("An error occurred while deleting the category.");
+        }
+    };
+    // Logout Function
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        router.push("/login");
+    };
+
+    //copy function
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("password copied to clipboard");
+        } catch (err) {
+            console.error("failed to copy password");
+        }
+    };
+
+    return (
+        <div className={Styles.container}>
+            <header className={Styles.header}>
+                <h1 className={Styles.title}>SNP-Manager</h1>
+                <button onClick={handleLogout} className={Styles.logoutButton}>
+                    Logout
                 </button>
-                <button
-                  onClick={() => handleDeleteCategory(category.id)}
-                  className={Styles.deleteButtonCategories}
-                >
-                  X
-                </button>
-                {category.name}
-              </li>
-            ))}
-          </ul>
-          <div className={Styles.createCategory}>
-            <input
-              type="text"
-              placeholder="New Category"
-              value={newCategory || ""}
-              onChange={(e) => setNewCategory(e.target.value)}
-              className={Styles.input}
-            />
-            <button
-              onClick={handleCreateCategory}
-              className={Styles.createButton}
-            >
-              Add
-            </button>
-          </div>
-          {error && <p className={Styles.error}>{error}</p>}
-          {success && <p className={Styles.success}>{success}</p>}
-        </aside>
+            </header>
+            <div className={Styles.content}>
+                <aside className={Styles.menu}>
+                    <h2>Categories</h2>
+                    <ul>
+                        {categories.map((category, index) => (
+                            <li
+                                key={category.id || index}
+                                onClick={() => handleCategoryClick(category.id)}
+                                className={`${Styles.categoryItem} ${
+                                    selectedCategoryId === category.id
+                                        ? Styles.activeCategory
+                                        : ""
+                                }`}
+                            >
+                                <button
+                                    onClick={handleEditCategory}
+                                    className={Styles.createButton}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        handleDeleteCategory(category.id)
+                                    }
+                                    className={Styles.deleteButtonCategories}
+                                >
+                                    X
+                                </button>
+                                {category.name}
+                            </li>
+                        ))}
+                    </ul>
+                    <div className={Styles.createCategory}>
+                        <input
+                            type="text"
+                            placeholder="New Category"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            className={Styles.input}
+                        />
+                        <button
+                            onClick={handleCreateCategory}
+                            className={Styles.createButton}
+                        >
+                            Add
+                        </button>
+                    </div>
+                    {error && <p className={Styles.error}>{error}</p>}
+                    {success && <p className={Styles.success}>{success}</p>}
+                </aside>
 
-        <main className={Styles.passwordList}>
-          <h2>Passwords</h2>
-          <div className={Styles.passwordGrid}>
-            {passwords.length === 0 ? (
-              <p>No passwords found.</p>
-            ) : (
-              passwords.map((password) => (
-                <div
-                  key={password.id}
-                  onClick={() => {
-                    setSelectedPasswordId(password.id);
-                  }}
-                >
-                  <div className={Styles.passwordItem}>
-                    <h3>{password.title}</h3>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          <button
-            onClick={() => setIsPasswordModalOpen(true)}
-            className={Styles.createButton}
-          >
-            Create New Password
-          </button>
-        </main>
+                <main className={Styles.passwordList}>
+                    <h2>Passwords</h2>
+                    <div className={Styles.passwordGrid}>
+                        {passwords.length === 0 ? (
+                            <p>No passwords found.</p>
+                        ) : (
+                            passwords.map((password) => (
+                                <div
+                                    key={password.id}
+                                    onClick={() => {
+                                        setSelectedPasswordId(password.id);
+                                    }}
+                                >
+                                    <div className={Styles.passwordItem}>
+                                        <h3>{password.title}</h3>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <button
+                        onClick={() => setIsPasswordModalOpen(true)}
+                        className={Styles.createButton}
+                    >
+                        Create New Password
+                    </button>
+                </main>
 
                 {selectedPassword && (
                     <div className={Styles.passwordDetailsModal}>
                         <h3>{selectedPassword.title}</h3>
 
-                        <p><strong>Username:</strong></p>
+                        <p>
+                            <strong>Username:</strong>
+                        </p>
                         <p>
                             {selectedPassword.username}
-                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.username)}>
+                            <button
+                                className={Styles.copyButton}
+                                onClick={() =>
+                                    copyToClipboard(selectedPassword.username)
+                                }
+                            >
                                 <Copy size={15} />
                             </button>
                         </p>
 
-                        <p><strong>Password:</strong></p>
                         <p>
-                            {isPasswordVisible ? selectedPassword.password : "*****"}
-                            <button className={Styles.copyButton} onClick={() => copyToClipboard(selectedPassword.password)}>
+                            <strong>Password:</strong>
+                        </p>
+                        <p>
+                            {isPasswordVisible
+                                ? selectedPassword.password
+                                : "*****"}
+                            <button
+                                className={Styles.copyButton}
+                                onClick={() =>
+                                    copyToClipboard(selectedPassword.password)
+                                }
+                            >
                                 <Copy size={15} />
                             </button>
-                            <button onClick={togglePasswordVisibility} className={Styles.isVisible}>
-                                {isPasswordVisible ? <EyeOff size={15} /> : <Eye size={15}/>}
+                            <button
+                                onClick={togglePasswordVisibility}
+                                className={Styles.isVisible}
+                            >
+                                {isPasswordVisible ? (
+                                    <EyeOff size={15} />
+                                ) : (
+                                    <Eye size={15} />
+                                )}
                             </button>
                         </p>
 
-                        <p><strong>URL:</strong></p>
+                        <p>
+                            <strong>URL:</strong>
+                        </p>
                         <p>{selectedPassword.url}</p>
 
-                        <p><strong>Notes:</strong></p>
+                        <p>
+                            <strong>Notes:</strong>
+                        </p>
                         <p>{selectedPassword.notes}</p>
 
-                        <button onClick={() => setSelectedPasswordId(null)}>Close</button>
+                        <button onClick={() => setSelectedPasswordId(null)}>
+                            Close
+                        </button>
                         <button onClick={handleEditPassword}>Edit</button>
                         <button onClick={handleDeletePassword}>Delete</button>
                     </div>
                 )}
 
-
-        {isPasswordModalOpen && (
-          <div className={Styles.modal}>
-            <div className={Styles.modalContent}>
-              <h3>New Password</h3>
-              <input
-                type="text"
-                placeholder="Title"
-                value={newPassword.title}
-                onChange={(e) =>
-                  setNewPassword({
-                    ...newPassword,
-                    title: e.target.value,
-                  })
-                }
-                className={Styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Username"
-                value={newPassword.username}
-                onChange={(e) =>
-                  setNewPassword({
-                    ...newPassword,
-                    username: e.target.value,
-                  })
-                }
-                className={Styles.input}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={newPassword.password}
-                onChange={(e) =>
-                  setNewPassword({
-                    ...newPassword,
-                    password: e.target.value,
-                  })
-                }
-                className={Styles.input}
-              />
-              <input
-                type="url"
-                placeholder="URL"
-                value={newPassword.url}
-                onChange={(e) =>
-                  setNewPassword({
-                    ...newPassword,
-                    url: e.target.value,
-                  })
-                }
-                className={Styles.input}
-              />
-              <textarea
-                placeholder="Notes"
-                value={newPassword.notes}
-                onChange={(e) =>
-                  setNewPassword({
-                    ...newPassword,
-                    notes: e.target.value,
-                  })
-                }
-                className={Styles.input}
-              ></textarea>
-              <button
-                onClick={handleCreatePassword}
-                className={Styles.createButton}
-              >
-                Create Password
-              </button>
-              <button onClick={() => setIsPasswordModalOpen(false)}>
-                Close
-              </button>
+                {isPasswordModalOpen && (
+                    <div className={Styles.modal}>
+                        <div className={Styles.modalContent}>
+                            <h3>New Password</h3>
+                            <input
+                                type="text"
+                                placeholder="Title"
+                                value={newPassword.title}
+                                onChange={(e) =>
+                                    setNewPassword({
+                                        ...newPassword,
+                                        title: e.target.value,
+                                    })
+                                }
+                                className={Styles.input}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Username"
+                                value={newPassword.username}
+                                onChange={(e) =>
+                                    setNewPassword({
+                                        ...newPassword,
+                                        username: e.target.value,
+                                    })
+                                }
+                                className={Styles.input}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={newPassword.password}
+                                onChange={(e) =>
+                                    setNewPassword({
+                                        ...newPassword,
+                                        password: e.target.value,
+                                    })
+                                }
+                                className={Styles.input}
+                            />
+                            <input
+                                type="url"
+                                placeholder="URL"
+                                value={newPassword.url}
+                                onChange={(e) =>
+                                    setNewPassword({
+                                        ...newPassword,
+                                        url: e.target.value,
+                                    })
+                                }
+                                className={Styles.input}
+                            />
+                            <textarea
+                                placeholder="Notes"
+                                value={newPassword.notes}
+                                onChange={(e) =>
+                                    setNewPassword({
+                                        ...newPassword,
+                                        notes: e.target.value,
+                                    })
+                                }
+                                className={Styles.input}
+                            ></textarea>
+                            <button
+                                onClick={handleCreatePassword}
+                                className={Styles.createButton}
+                            >
+                                Create Password
+                            </button>
+                            <button
+                                onClick={() => setIsPasswordModalOpen(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
