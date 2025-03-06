@@ -3,9 +3,11 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev --experimental-https",
+        "predev": "node scripts/generate-env.js",
+        "dev": "next dev --experimental-https -p 3033",
+        "prestart": "node scripts/generate-env.js",
         "build": "next build",
-        "start": "next start --experimental-https",
+        "start": "next start --experimental-https -p 3033",
         "lint": "npx eslint app",
         "lint:api": "npx eslint app/api",
         "migrate": "tsx ./app/api/migrations.ts",

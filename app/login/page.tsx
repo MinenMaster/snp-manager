@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const router = useRouter();
+    const apiUrl = "https://localhost:3033/api";
     const [activeTab, setActiveTab] = useState("register");
     const [formData, setFormData] = useState({
         username: "",
@@ -19,16 +20,13 @@ export default function LoginPage() {
             const token = localStorage.getItem("authToken");
             if (token) {
                 try {
-                    const response = await fetch(
-                        "https://localhost:3000/api/auth",
-                        {
-                            method: "GET",
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                                "Content-Type": "application/json",
-                            },
-                        }
-                    );
+                    const response = await fetch(`${apiUrl}/auth`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
 
                     if (response.status === 200) {
                         router.push("/");
@@ -55,7 +53,6 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const apiUrl = "https://snp-api.vercel.app";
         const endpoint =
             activeTab === "login" ? `${apiUrl}/login` : `${apiUrl}/register`;
 
