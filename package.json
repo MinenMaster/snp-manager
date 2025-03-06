@@ -3,7 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+        "predev": "node scripts/generate-env.js",
         "dev": "next dev --experimental-https",
+        "prestart": "node scripts/generate-env.js",
         "build": "next build",
         "start": "next start --experimental-https",
         "lint": "npx eslint app",
