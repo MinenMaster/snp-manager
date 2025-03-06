@@ -22,7 +22,7 @@
         "jsonwebtoken": "^9.0.2",
         "lucide-react": "^0.476.0",
         "moment-timezone": "^0.5.47",
-        "next": "^15.1.7",
+        "next": "^15.2.1",
         "nextjs": "file:",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -39,7 +39,7 @@
         "@types/jsonwebtoken": "^9.0.9",
         "@types/moment-timezone": "^0.5.13",
         "@types/next": "^8.0.7",
-        "@types/node": "^20.17.19",
+        "@types/node": "^20.17.23",
         "@types/react": "^18.3.18",
         "@types/react-dom": "^18.3.5",
         "eslint": "^9.21.0",
@@ -50,7 +50,7 @@
         "postcss": "^8.5.3",
         "tailwindcss": "^3.4.17",
         "ts-node": "^10.9.2",
-        "typescript": "^5.7.3",
-        "typescript-eslint": "^8.25.0"
+        "typescript": "^5.8.2",
+        "typescript-eslint": "^8.26.0"
     }
 }
