@@ -6,64 +6,68 @@ import Styles from "./page.module.css";
 import { Copy, Eye, EyeOff } from "lucide-react";
 
 interface Category {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 }
 
 interface Password {
-    id: number;
-    title: string;
-    username: string;
-    password: string;
-    url: string;
-    notes: string;
-    categoryName: string;
-    categoryId: number;
+  id: number;
+  title: string;
+  username: string;
+  password: string;
+  url: string;
+  notes: string;
+  categoryName: string;
+  categoryId: number;
 }
 
 export default function LandingPage() {
-    const router = useRouter();
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [passwords, setPasswords] = useState<Password[]>([]);
-    const [newCategory, setNewCategory] = useState("");
-    const [newPassword, setNewPassword] = useState({
-        title: "",
-        username: "",
-        password: "",
-        url: "",
-        notes: "",
-        categoryId: 0,
-    });
-    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-        null
-    );
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [selectedPasswordId, setSelectedPasswordId] = useState<number | null>(
-        null
-    );
-    // const [selectedPassword, setSelectedPassword] = useState({
-    //     title: "",
-    //     username: "",
-    //     password: "",
-    //     url: "",
-    //     notes: "",
-    //     categoryId: 0,
-    // });
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const router = useRouter();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [passwords, setPasswords] = useState<Password[]>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [newPassword, setNewPassword] = useState({
+    title: "",
+    username: "",
+    password: "",
+    url: "",
+    notes: "",
+    categoryId: 0,
+  });
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null
+  );
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [selectedPasswordId, setSelectedPasswordId] = useState<number | null>(
+    null
+  );
+  // const [selectedPassword, setSelectedPassword] = useState({
+  //     title: "",
+  //     username: "",
+  //     password: "",
+  //     url: "",
+  //     notes: "",
+  //     categoryId: 0,
+  // });
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-    const selectedPassword = passwords.find(
-        (password) => password.id === selectedPasswordId
-    );
+  const selectedPassword = passwords.find(
+    (password) => password.id === selectedPasswordId
+  );
 
-    // Fetch categories and passwords
-    useEffect(() => {
-        const checkAuthAndFetchCategoriesAndPasswords = async () => {
-            const token = localStorage.getItem("authToken");
-            if (!token) {
-                router.push("/login");
-                return;
-            }
+  const selectedCategory = categories.find(
+    (categories) => categories.id === selectedCategoryId
+  );
+
+  // Fetch categories and passwords
+  useEffect(() => {
+    const checkAuthAndFetchCategoriesAndPasswords = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
             try {
                 const response = await fetch(
@@ -77,39 +81,39 @@ export default function LandingPage() {
                     }
                 );
 
-                if (response.status !== 200) {
-                    router.push("/login");
-                    return;
-                }
+        if (response.status !== 200) {
+          router.push("/login");
+          return;
+        }
 
-                // Fetch categories
-                const categoriesResponse = await fetch(
-                    "https://snp-api.vercel.app/categories",
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
+        // Fetch categories
+        const categoriesResponse = await fetch(
+          "https://snp-api.vercel.app/categories",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-                if (categoriesResponse.ok) {
-                    const categoriesData = await categoriesResponse.json();
-                    setCategories(categoriesData);
-                }
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json();
+          setCategories(categoriesData);
+        }
 
-                // Fetch passwords
-                const passwordsResponse = await fetch(
-                    "https://snp-api.vercel.app/passwords",
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
+        // Fetch passwords
+        const passwordsResponse = await fetch(
+          "https://snp-api.vercel.app/passwords",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
                 if (passwordsResponse.ok) {
                     const passwordsData = await passwordsResponse.json();
@@ -121,53 +125,50 @@ export default function LandingPage() {
             }
         };
 
-        checkAuthAndFetchCategoriesAndPasswords();
-    }, [router]);
+    checkAuthAndFetchCategoriesAndPasswords();
+  }, [router]);
 
-    const handleCreateCategory = async () => {
-        setError("");
-        setSuccess("");
+  const handleCreateCategory = async () => {
+    setError("");
+    setSuccess("");
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setError("You are not logged in.");
-            return;
-        }
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("You are not logged in.");
+      return;
+    }
 
-        if (!newCategory.trim()) {
-            setError("Category name cannot be empty.");
-            return;
-        }
+    if (!newCategory.trim()) {
+      setError("Category name cannot be empty.");
+      return;
+    }
 
-        try {
-            const response = await fetch(
-                "https://snp-api.vercel.app/categories",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ name: newCategory }),
-                }
-            );
+    try {
+      const response = await fetch("https://snp-api.vercel.app/categories", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newCategory }),
+      });
 
-            if (response.status === 201) {
-                const newCategoryResponse = await response.json();
-                setCategories([
-                    ...categories,
-                    { id: newCategoryResponse.id, name: newCategory },
-                ]);
-                setNewCategory("");
-                setSuccess("Category created successfully.");
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Error creating category.");
-            }
-        } catch (err) {
-            setError("An error occurred. Please try again later.");
-        }
-    };
+      if (response.status === 201) {
+        const newCategoryResponse = await response.json();
+        setCategories([
+          ...categories,
+          { id: newCategoryResponse.id, name: newCategory },
+        ]);
+        setNewCategory("");
+        setSuccess("Category created successfully.");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Error creating category.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again later.");
+    }
+  };
 
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -180,155 +181,198 @@ export default function LandingPage() {
         setNewPassword({ ...newPassword, categoryId });
     };
 
-    const handleCreatePassword = async () => {
-        setError("");
-        setSuccess("");
+  const handleCreatePassword = async () => {
+    setError("");
+    setSuccess("");
 
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setError("You are not logged in.");
-            return;
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("You are not logged in.");
+      return;
+    }
+
+    if (!newPassword.title.trim() || !newPassword.password.trim()) {
+      setError("Title and password are required.");
+      return;
+    }
+
+    if (newPassword.categoryId === 0) {
+      setError("Please select a category.");
+      return;
+    }
+
+    try {
+      const response = await fetch("https://snp-api.vercel.app/passwords", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPassword),
+      });
+
+      if (response.status === 201) {
+        const responseData = await response.json();
+        setSuccess("Password created successfully.");
+        setNewPassword({
+          title: "",
+          username: "",
+          password: "",
+          url: "",
+          notes: "",
+          categoryId: 0,
+        });
+
+        const passwordsResponse = await fetch(
+          "https://snp-api.vercel.app/passwords",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (passwordsResponse.ok) {
+          const passwordsData = await passwordsResponse.json();
+          setPasswords(passwordsData);
         }
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Error creating password.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again later.");
+    }
+  };
 
-        if (!newPassword.title.trim() || !newPassword.password.trim()) {
-            setError("Title and password are required.");
-            return;
+  //DO NOT TOUCH THIS CODE IT WORKS (NOBODY KNOWS WHY)
+  const handleEditCategory = async () => {
+    if (!selectedCategoryId || !newCategory) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("You are not logged in.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://snp-api.vercel.app/categories/${selectedCategoryId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: newCategory }),
         }
+      );
 
-        if (newPassword.categoryId === 0) {
-            setError("Please select a category.");
-            return;
+      if (response.ok) {
+        const updatedCategory = { name: newCategory };
+
+        console.log("updatedCategory", updatedCategory);
+
+        setCategories((prevCategories) =>
+          prevCategories.map((category) =>
+            category.id === selectedCategoryId
+              ? { ...category, ...updatedCategory }
+              : category
+          )
+        );
+
+        setNewCategory(updatedCategory.name);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Error editing category.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again later.");
+    }
+  };
+
+  const handleEditPassword = async () => {
+    if (selectedPassword) {
+      setNewPassword({
+        title: selectedPassword.title,
+        username: selectedPassword.username,
+        password: selectedPassword.password,
+        url: selectedPassword.url,
+        notes: selectedPassword.notes,
+        categoryId: selectedPassword.categoryId,
+      });
+    }
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("You are not logged in.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://snp-api.vercel.app/passwords/${selectedPasswordId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
+      );
+      if (response.ok) {
+        const filteredPasswords = passwords.filter(
+          (password) => password.id !== selectedPasswordId
+        );
+        setPasswords(filteredPasswords);
+        setSelectedPasswordId(null);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Error editing password.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again later.");
+    }
 
-        try {
-            const response = await fetch(
-                "https://snp-api.vercel.app/passwords",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(newPassword),
-                }
-            );
+    setIsPasswordModalOpen(true);
+  };
 
-            if (response.status === 201) {
-                const responseData = await response.json();
-                setSuccess("Password created successfully.");
-                setNewPassword({
-                    title: "",
-                    username: "",
-                    password: "",
-                    url: "",
-                    notes: "",
-                    categoryId: 0,
-                });
+  //Delete Password via Delete Method
+  const handleDeletePassword = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("You are not logged in.");
+      return;
+    }
 
-                const passwordsResponse = await fetch(
-                    "https://snp-api.vercel.app/passwords",
-                    {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
-                    }
-                );
-
-                if (passwordsResponse.ok) {
-                    const passwordsData = await passwordsResponse.json();
-                    setPasswords(passwordsData);
-                }
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Error creating password.");
-            }
-        } catch (err) {
-            setError("An error occurred. Please try again later.");
+    try {
+      const response = await fetch(
+        `https://snp-api.vercel.app/passwords/${selectedPasswordId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-    };
+      );
 
-    const handleEditPassword = async () => {
-        if (selectedPassword) {
-            setNewPassword({
-                title: selectedPassword.title,
-                username: selectedPassword.username,
-                password: selectedPassword.password,
-                url: selectedPassword.url,
-                notes: selectedPassword.notes,
-                categoryId: selectedPassword.categoryId,
-            });
-        }
-
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setError("You are not logged in.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://snp-api.vercel.app/passwords/${selectedPasswordId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.ok) {
-                const filteredPasswords = passwords.filter(
-                    (password) => password.id !== selectedPasswordId
-                );
-                setPasswords(filteredPasswords);
-                setSelectedPasswordId(null);
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Error deleting password.");
-            }
-        } catch (err) {
-            setError("An error occurred. Please try again later.");
-        }
-
-        setIsPasswordModalOpen(true);
-    };
-    // delete Password Handler
-    const handleDeletePassword = async () => {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-            setError("You are not logged in.");
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://snp-api.vercel.app/passwords/${selectedPasswordId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.ok) {
-                const filteredPasswords = passwords.filter(
-                    (password) => password.id !== selectedPasswordId
-                );
-                setPasswords(filteredPasswords);
-                setSelectedPasswordId(null);
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || "Error deleting password.");
-            }
-        } catch (err) {
-            setError("An error occurred. Please try again later.");
-        }
-    };
+      if (response.ok) {
+        const filteredPasswords = passwords.filter(
+          (password) => password.id !== selectedPasswordId
+        );
+        setPasswords(filteredPasswords);
+        setSelectedPasswordId(null);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Error deleting password.");
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again later.");
+    }
+  };
 
     const handleDeleteCategory = async (categoryId: number) => {
         const token = localStorage.getItem("authToken");
@@ -425,6 +469,12 @@ export default function LandingPage() {
                                         : ""
                                 }`}
                             >
+                                <button
+                                    onClick={handleEditCategory}
+                                    className={Styles.createButton}
+                                >
+                                    Edit
+                                </button>
                                 <button
                                     onClick={() =>
                                         handleDeleteCategory(category.id)
