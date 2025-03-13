@@ -38,7 +38,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
         const userId = userRows[0].id;
 
-        const query = `SELECT id, name FROM snp_categories WHERE userId = ?`;
+        const query = "SELECT id, name, pinned FROM snp_categories WHERE userId = ?";
+
         const rows = (await apiGet(query, [
             userId.toString(),
         ])) as CategoryRow[];
@@ -87,8 +88,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
         const userId = userRows[0].id;
 
-        const insertQuery = `INSERT INTO snp_categories (userId, name) VALUES (?, ?)`;
-        await apiPost(insertQuery, [userId.toString(), name]);
+        const { pinned = false } = await req.json();
+        const insertQuery =
+          "INSERT INTO snp_categories (userId, name, pinned) VALUES (?, ?, ?)";
+        await apiPost(insertQuery, [
+          userId.toString(),
+          name,
+          pinned.toString(),
+        ]);
 
         return new NextResponse(
             JSON.stringify({ message: "Category created successfully" }),

@@ -59,8 +59,17 @@ export async function PUT(
             );
         }
 
-        const updateQuery = `UPDATE snp_categories SET name = ? WHERE id = ? AND userId = ?`;
-        await apiPut(updateQuery, [name, id, userId.toString()]);
+        const { pinned } = await req.json();
+        if (name === undefined && pinned === undefined) {
+          return new NextResponse(
+            JSON.stringify({ message: "Nothing to update" }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+
+        const updateQuery =
+          "UPDATE snp_categories SET name = COALESCE(?, name), pinned = COALESCE(?, pinned) WHERE id = ? AND userId = ?";
+        await apiPut(updateQuery, [name, pinned, id, userId.toString()]);
 
         return new NextResponse(
             JSON.stringify({ message: "Category updated successfully" }),

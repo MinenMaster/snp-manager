@@ -52,6 +52,7 @@ export default function LandingPage() {
     //     categoryId: 0,
     // });
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [categoryPinned, setCategoryPinned] = useState(false);
 
     const selectedPassword = passwords.find(
         (password) => password.id === selectedPasswordId
