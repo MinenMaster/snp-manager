@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Styles from "./page.module.css";
 import { Copy, Eye, EyeOff } from "lucide-react";
+import { Sortable } from "react-sortablejs";
 
 interface Category {
   id: number;
@@ -425,6 +426,14 @@ export default function LandingPage() {
       console.error("failed to copy password");
     }
   };
+
+  const handleSort = (order: string[]) => {
+    const sortedPasswords = order
+      .map((id) => passwords.find((password) => password.id.toString() === id))
+      .filter(Boolean) as Password[];
+    setPasswords(sortedPasswords);
+  };
+
   //return
   return (
     <div className={Styles.container}>

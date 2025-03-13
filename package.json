@@ -26,6 +26,8 @@
         "nextjs": "file:",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+        "react-sortablejs": "^6.1.4",
+        "sortablejs": "^1.15.6",
         "sqlite": "^5.1.1",
         "sqlite3": "^5.1.7",
         "tsx": "^4.19.3"
