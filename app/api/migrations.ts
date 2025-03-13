@@ -55,19 +55,20 @@ export const migrate = () => {
         );
 
         db.run(
-            `
+          `
             CREATE TABLE IF NOT EXISTS snp_categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 userId INT NOT NULL REFERENCES snp_users(id) ON DELETE CASCADE,
-                name VARCHAR(255) NOT NULL
+                name VARCHAR(255) NOT NULL,
+                pinned BOOLEAN DEFAULT FALSE
             );
             `,
-            (err: Error) => {
-                if (err) {
-                    console.error(err.message);
-                }
-                console.log("snp_categories table created successfully.");
+          (err: Error) => {
+            if (err) {
+              console.error(err.message);
             }
+            console.log("snp_categories table created successfully.");
+          }
         );
 
         db.run(
