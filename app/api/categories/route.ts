@@ -66,7 +66,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
 
-        const { name } = await req.json();
+        const { name, pinned = false } = await req.json();
         if (!name) {
             return new NextResponse(
                 JSON.stringify({ message: "Category name is required" }),
@@ -88,7 +88,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
         const userId = userRows[0].id;
 
-        const { pinned = false } = await req.json();
         const insertQuery =
           "INSERT INTO snp_categories (userId, name, pinned) VALUES (?, ?, ?)";
         await apiPost(insertQuery, [

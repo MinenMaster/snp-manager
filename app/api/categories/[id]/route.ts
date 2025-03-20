@@ -27,7 +27,7 @@ export async function PUT(
             );
         }
 
-        const { name } = await req.json();
+        const { name, pinned } = await req.json();
         if (!name) {
             return new NextResponse(
                 JSON.stringify({ message: "Category name is required" }),
@@ -59,7 +59,6 @@ export async function PUT(
             );
         }
 
-        const { pinned } = await req.json();
         if (name === undefined && pinned === undefined) {
           return new NextResponse(
             JSON.stringify({ message: "Nothing to update" }),
