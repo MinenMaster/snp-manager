@@ -15,15 +15,15 @@
         "test": "jest"
     },
     "dependencies": {
-        "autoprefixer": "^10.4.20",
-        "axios": "^1.8.1",
+        "autoprefixer": "^10.4.21",
+        "axios": "^1.8.4",
         "bcryptjs": "^3.0.2",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "jsonwebtoken": "^9.0.2",
         "lucide-react": "^0.476.0",
-        "moment-timezone": "^0.5.47",
-        "next": "^15.2.1",
+        "moment-timezone": "^0.5.48",
+        "next": "^15.2.3",
         "nextjs": "file:",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -40,10 +40,10 @@
         "@types/jsonwebtoken": "^9.0.9",
         "@types/moment-timezone": "^0.5.13",
         "@types/next": "^8.0.7",
-        "@types/node": "^20.17.23",
-        "@types/react": "^18.3.18",
+        "@types/node": "^20.17.27",
+        "@types/react": "^18.3.20",
         "@types/react-dom": "^18.3.5",
-        "eslint": "^9.21.0",
+        "eslint": "^9.23.0",
         "eslint-plugin-react": "^7.37.4",
         "globals": "^15.15.0",
         "jest": "^29.7.0",
@@ -52,6 +52,6 @@
         "tailwindcss": "^3.4.17",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2",
-        "typescript-eslint": "^8.26.0"
+        "typescript-eslint": "^8.27.0"
     }
 }
