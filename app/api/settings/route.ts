@@ -71,10 +71,9 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
                 { status: 400, headers: { "Content-Type": "application/json" } }
             );
         }
-        const userRows = (await apiGet(
-            `SELECT id FROM snp_users WHERE username = ?`,
-            [user.username]
-        )) as UserRow[];
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
