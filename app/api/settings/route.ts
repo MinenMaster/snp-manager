@@ -14,17 +14,13 @@ interface SettingsRow {
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
-        const userRows = (await apiGet(
-            `SELECT id FROM snp_users WHERE username = ?`,
-            [user.username]
-        )) as UserRow[];
+        const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
@@ -64,11 +60,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export async function PUT(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
         const { twofactorenabled, nextreminder } = await req.json();

@@ -16,17 +16,13 @@ interface CategoryRow {
 export async function GET(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
-        const userRows = (await apiGet(userIdQuery, [
-            user.username,
-        ])) as UserRow[];
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
@@ -38,7 +34,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         }
         const userId = userRows[0].id;
 
-        const query = "SELECT id, name, pinned FROM snp_categories WHERE userId = ?";
+        const query =
+            "SELECT id, name, pinned FROM snp_categories WHERE userId = ?";
 
         const rows = (await apiGet(query, [
             userId.toString(),
@@ -59,11 +56,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
         const { name, pinned = false } = await req.json();
@@ -74,9 +68,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             );
         }
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
-        const userRows = (await apiGet(userIdQuery, [
-            user.username,
-        ])) as UserRow[];
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
@@ -89,11 +82,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const userId = userRows[0].id;
 
         const insertQuery =
-          "INSERT INTO snp_categories (userId, name, pinned) VALUES (?, ?, ?)";
+            "INSERT INTO snp_categories (userId, name, pinned) VALUES (?, ?, ?)";
         await apiPost(insertQuery, [
-          userId.toString(),
-          name,
-          pinned.toString(),
+            userId.toString(),
+            name,
+            pinned.toString(),
         ]);
 
         return new NextResponse(

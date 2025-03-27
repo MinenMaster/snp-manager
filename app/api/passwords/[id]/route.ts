@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { apiGet, apiPost, apiDelete } from "../../database";
+import { apiGet, apiPut, apiDelete } from "../../database";
 import { getCurrentTimestampISO } from "../../tools/timestamp";
 import { authenticateJWT } from "../../tools/authenticateJWT";
 import { encrypt, decrypt } from "../../tools/encryption";
@@ -28,11 +28,8 @@ export async function PUT(
     const { id } = await params;
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
         const {
@@ -45,9 +42,8 @@ export async function PUT(
         } = await req.json();
 
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
-        const userRows = (await apiGet(userIdQuery, [
-            user.username,
-        ])) as UserRow[];
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
@@ -87,7 +83,7 @@ export async function PUT(
           lastUpdatedAt = ?
       WHERE id = ? AND userId = ?
     `;
-        await apiPost(updateQuery, [
+        await apiPut(updateQuery, [
             title || null,
             pwdUsername || null,
             encryptedPassword || null,
@@ -128,17 +124,13 @@ export async function DELETE(
     const { id } = await params;
     try {
         const user = authenticateJWT(req);
-        if (typeof user === "string" || !("username" in user)) {
-            return new NextResponse(
-                JSON.stringify({ message: "Invalid user token" }),
-                { status: 401, headers: { "Content-Type": "application/json" } }
-            );
+        if (user instanceof NextResponse) {
+            return user;
         }
 
         const userIdQuery = `SELECT id FROM snp_users WHERE username = ?`;
-        const userRows = (await apiGet(userIdQuery, [
-            user.username,
-        ])) as UserRow[];
+        const { username } = user as { username: string };
+        const userRows = (await apiGet(userIdQuery, [username])) as UserRow[];
         if (!userRows || userRows.length === 0) {
             return new NextResponse(
                 JSON.stringify({ message: "User not found" }),
