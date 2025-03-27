@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+if (!process.env.JWT_SECRET) {
+    throw new Error("Missing JWT_SECRET in environment variables.");
+}
+
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export const authenticateJWT = (req: NextRequest) => {

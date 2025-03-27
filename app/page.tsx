@@ -283,6 +283,7 @@ export default function LandingPage() {
         }
     };
 
+    // edit password via delete and create method (dirty quick fix)
     const handleEditPassword = async () => {
         if (selectedPassword) {
             setNewPassword({
@@ -305,7 +306,7 @@ export default function LandingPage() {
             const response = await fetch(
                 `${apiUrl}/passwords/${selectedPasswordId}`,
                 {
-                    method: "PUT",
+                    method: "DELETE",
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
