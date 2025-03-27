@@ -5,8 +5,9 @@
     "scripts": {
         "predev": "node scripts/generate-env.js",
         "dev": "next dev --experimental-https -p 3033",
-        "prestart": "node scripts/generate-env.js",
+        "prebuild": "node scripts/generate-env.js",
         "build": "next build",
+        "prestart": "node scripts/generate-env.js",
         "start": "next start --experimental-https -p 3033",
         "lint": "npx eslint app",
         "lint:api": "npx eslint app/api",
